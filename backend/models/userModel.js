@@ -6,7 +6,6 @@ const userSchema = new Schema({
     type: String,
     required: [true, "Please add a name"],
     trim: true,
-    maxlength: [50, "Name can't be more than 50 ch"],
   },
   email: {
     type: String,
@@ -23,7 +22,6 @@ const userSchema = new Schema({
     type: String,
     required: [true, "Enter a password"],
     trim: true,
-    maxlength: [50, "password cant be more than 50 ch"],
     minlength: [6, "min len is 6"],
     select: false,
   },

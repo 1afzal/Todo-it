@@ -75,7 +75,7 @@ todoRouter.put("/update/todo/:id", async (req, res) => {
       });
     }
     res.status(200).json({
-      message: "todo is updated successfully",
+      message: "todo is updated",
     });
   } catch (err) {
     res.status(200).json({
@@ -84,5 +84,25 @@ todoRouter.put("/update/todo/:id", async (req, res) => {
   }
 });
 
-todoRouter.delete("/todo/delete", (req, res) => {});
+todoRouter.delete("/delete/todo/:id", async(req, res) => {
+  try{
+    const idx = req.params.id
+    const deleted_todo = await todoModel.findByIdAndDelete(idx)
+    if(!deleted_todo){
+      return res.status(404).json({
+        error: "todo not found"
+      })
+    }
+    res.status(200).json({
+      message: "todo successfully deleted",
+      title: deleted_todo.title
+    })
+  }
+  catch(err){
+    console.log("Error in  deleting todo\n");
+    res.status(400).json({
+      message: err.message
+    })
+  }
+});
 export default todoRouter;
