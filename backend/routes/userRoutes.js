@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { userModel } from "../models/userModel.js";
 import bcrypt from "bcrypt"
-import z from "zod";
+import z, { jwt } from "zod";
 const userRouter = Router();
 const JWT_SECRET_KEY = process.env.JWT_SECRET;
 
@@ -47,7 +47,50 @@ userRouter.post(`/signup`, async (req, res) => {
   }
 });
 
-userRouter.post(`/signin`, () => {
+userRouter.post(`/signin`, async(req,res) => {
 
+    const requiredBody = z.object({
+        email: z.string().min(3).email(),
+        password: z.string().min(3),
+    });
+
+    const parseDataSuccess = requiredBody.safeParse(req.body);
+
+    if(!parseDataSuccess){
+        console.log("Invalid credentials");
+        return res.status(400).json({
+            message: "Invalid credentials"
+        })
+    }
+    try{
+    const { email,password } = req.body;
+    if(!email || !password){
+        return res.status(404).json({
+            message: "Enter complete credentials"
+        })
+    }
+    const user = await userModel.findOne({email : email});
+
+    const isPasswordMatch = await bcrypt.compare(password,user.password);
+
+    if(isPasswordMatch){
+        const token = await jwt.sign({id: user._id},JWT_SECRET_KEY)
+        res.status(200).json({
+            message: "succesfull signup",
+            token: token
+        })
+    }
+    else{
+        res.status(400).json({
+            message: "signin error"
+        })
+    }
+}
+catch(err){
+    console.log(err.message)
+    res.status(400).json({
+        message: err.message
+    })
+}
 });
 export default userRouter;
